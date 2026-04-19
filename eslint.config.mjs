@@ -1,18 +1,68 @@
-import { defineConfig, globalIgnores } from "eslint/config";
-import nextVitals from "eslint-config-next/core-web-vitals";
-import nextTs from "eslint-config-next/typescript";
+import js from '@eslint/js';
+import nextPlugin from '@next/eslint-plugin-next';
+import tseslint from 'typescript-eslint';
+import unusedImports from 'eslint-plugin-unused-imports';
+import simpleImportSort from 'eslint-plugin-simple-import-sort';
 
-const eslintConfig = defineConfig([
-  ...nextVitals,
-  ...nextTs,
-  // Override default ignores of eslint-config-next.
-  globalIgnores([
-    // Default ignores of eslint-config-next:
-    ".next/**",
-    "out/**",
-    "build/**",
-    "next-env.d.ts",
-  ]),
-]);
+export default [
+  js.configs.recommended,
 
-export default eslintConfig;
+  {
+    plugins: {
+      '@next/next': nextPlugin,
+    },
+    rules: {
+      ...nextPlugin.configs['core-web-vitals'].rules,
+    },
+  },
+
+  {
+    plugins: {
+      'unused-imports': unusedImports,
+      'simple-import-sort': simpleImportSort,
+    },
+    rules: {
+      'unused-imports/no-unused-imports': 'error',
+      'simple-import-sort/imports': 'error',
+      'simple-import-sort/exports': 'error',
+      'no-undef': 'off',
+    },
+  },
+
+  {
+    files: ['**/*.ts', '**/*.tsx'],
+
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: {
+        project: './tsconfig.json',
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+
+    plugins: {
+      '@typescript-eslint': tseslint.plugin,
+      'unused-imports': unusedImports,
+    },
+
+    rules: {
+      ...tseslint.configs.recommended.rules,
+
+      'unused-imports/no-unused-vars': [
+        'error',
+        {
+          varsIgnorePattern: '^_',
+          argsIgnorePattern: '^_',
+        },
+      ],
+
+      '@typescript-eslint/consistent-type-imports': 'error',
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-floating-promises': 'error',
+    },
+  },
+
+  {
+    ignores: ['.next/**', 'node_modules/**', 'dist/**', 'eslint.config.mjs'],
+  },
+];
