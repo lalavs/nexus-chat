@@ -1,3 +1,5 @@
+import MessageList from '@/components/chat/MessageList';
+
 export default function Home() {
-  return <div />;
+  return <MessageList />;
 }
